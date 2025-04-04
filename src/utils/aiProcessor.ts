@@ -1,13 +1,33 @@
-
 import { DataType, ProcessedResult, TodoItem, TableData } from "../types";
 
 export async function processTranscription(transcription: string): Promise<ProcessedResult> {
-  // In a real app, this would call an AI service (OpenAI, etc.)
-  // For now, we'll use simple keyword detection as a placeholder
+  try {
+    // In a real implementation, this would call your backend API
+    // which would then call Anthropic's API
+    const response = await fetch('/api/process-transcription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ transcription }),
+    });
 
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error processing transcription:', error);
+    
+    // Fallback to simple keyword detection if API call fails
+    return fallbackProcessing(transcription);
+  }
+}
+
+function fallbackProcessing(transcription: string): ProcessedResult {
   const lowerCaseText = transcription.toLowerCase();
   
-  // Simple detection - in a real app this would use a language model
   if (containsTodoPattern(lowerCaseText)) {
     return {
       type: DataType.TODO,
